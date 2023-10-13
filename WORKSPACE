@@ -36,9 +36,9 @@ load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 
 gazelle_dependencies()
 
-load("//:go_third_party.bzl", "go_deps")
+load("//:tools/go_third_party.bzl", "go_deps")
 
-# gazelle:repository_macro go_third_party.bzl%go_deps
+# gazelle:repository_macro tools/go_third_party.bzl%go_deps
 go_deps()
 
 # ---------------------------
