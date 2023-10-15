@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@hello-bazel/*": [
+        "../bazel-bin/*",
+      ]
+    },
+  },
+}
