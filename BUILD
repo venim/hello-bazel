@@ -4,7 +4,7 @@ load("@bazel_gazelle//:def.bzl", "gazelle")
 gazelle(name = "gazelle")
 
 gazelle(
-    name = "go-install",
+    name = "go-get",
     args = [
         "-to_macro=tools/go_third_party.bzl%go_deps",
     ],
