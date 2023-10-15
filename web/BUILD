@@ -1,5 +1,6 @@
 load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@aspect_rules_rollup//rollup:defs.bzl", "rollup")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 ts_project(
     name = "web_ts",
@@ -27,4 +28,15 @@ rollup(
         "//:node_modules/@connectrpc/connect-web",
         "//:node_modules/@hello-bazel/proto",
     ],
+)
+
+go_library(
+    name = "static",
+    srcs = ["static.go"],
+    embedsrcs = [
+        ":bundle",
+        "index.html",
+    ],
+    importpath = "github.com/venim/hello-bazel/web/static",
+    visibility = ["//visibility:public"],
 )

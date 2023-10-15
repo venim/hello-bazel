@@ -7,6 +7,8 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//proto",
+        "//web:static",
+        "@com_github_improbable_eng_grpc_web//go/grpcweb",
         "@org_golang_google_grpc//:go_default_library",
     ],
 )
