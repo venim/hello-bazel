@@ -24,7 +24,7 @@ func run(ctx context.Context) error {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
-	addr := "localhost:10123"
+	addr := "localhost:8080"
 	cconn, err := grpc.Dial(addr, opts...)
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil)).With("addr", "localhost:10123")
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil)).With("addr", "localhost:8080")
 	logger.Info(res.Message)
 	return nil
 }

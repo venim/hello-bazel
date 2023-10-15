@@ -31,12 +31,12 @@ rollup(
 )
 
 go_library(
-    name = "static",
+    name = "web",
     srcs = ["static.go"],
     embedsrcs = [
         ":bundle",
         "index.html",
     ],
-    importpath = "github.com/venim/hello-bazel/web/static",
+    importpath = "github.com/venim/hello-bazel/web",
     visibility = ["//visibility:public"],
-)
+)  # keep

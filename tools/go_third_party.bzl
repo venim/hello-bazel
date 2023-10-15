@@ -25,6 +25,13 @@ def go_deps():
     )
 
     go_repository(
+        name = "com_github_google_go_cmp",
+        importpath = "github.com/google/go-cmp",
+        sum = "h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=",
+        version = "v0.6.0",
+    )
+
+    go_repository(
         name = "com_github_improbable_eng_grpc_web",
         importpath = "github.com/improbable-eng/grpc-web",
         sum = "h1:BN+7z6uNXZ1tQGcNAuaU1YjsLTApzkjt2tzCixLaUPQ=",
@@ -55,4 +62,10 @@ def go_deps():
         importpath = "google.golang.org/grpc",
         sum = "h1:BjnpXut1btbtgN/6sp+brB2Kbm2LjNXnidYujAVbSoQ=",
         version = "v1.58.3",
+    )
+    go_repository(
+        name = "org_golang_x_net",
+        importpath = "golang.org/x/net",
+        sum = "h1:pVaXccu2ozPjCXewfr1S7xza/zcXTity9cCdXQYSjIM=",
+        version = "v0.17.0",
     )

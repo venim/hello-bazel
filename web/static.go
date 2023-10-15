@@ -1,4 +1,4 @@
-package static 
+package web
 
 import (
 	"embed"

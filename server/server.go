@@ -5,62 +5,65 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 
 	pb "github.com/venim/hello-bazel/proto"
-	"github.com/venim/hello-bazel/web/static"
+	"github.com/venim/hello-bazel/web"
 )
 
 func main() {
-	if err := run(context.Background()); err != nil {
+	if err := run(context.Background(), ":8080"); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func run(ctx context.Context) error {
+func run(ctx context.Context, addr string) error {
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+	svc := new()
 	grpcSrv := grpc.NewServer()
-	pb.RegisterHelloServiceServer(grpcSrv, new())
+	pb.RegisterHelloServiceServer(grpcSrv, svc)
+	grpc_health_v1.RegisterHealthServer(grpcSrv, health.NewServer())
 
 	wrappedSrv := grpcweb.WrapServer(grpcSrv, grpcweb.WithCorsForRegisteredEndpointsOnly(false))
+
+	mux := http.NewServeMux()
+	mux.Handle("/", http.FileServer(http.FS(web.Static)))
+
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
+			grpcSrv.ServeHTTP(w, r)
+			return
+		}
 		if wrappedSrv.IsGrpcWebRequest(r) {
 			wrappedSrv.ServeHTTP(w, r)
 			return
 		}
-		http.FileServer(http.FS(static.Static)).ServeHTTP(w, r)
+		mux.ServeHTTP(w, r)
 	})
-	httpServer := &http.Server{Addr: ":8080", Handler: handler}
+
+	httpServer := &http.Server{Addr: addr, Handler: h2c.NewHandler(handler, &http2.Server{})}
+
 	errs := make(chan error, 0)
 	go func() {
-		lis, err := net.Listen("tcp", "localhost:8080")
-		if err != nil {
-			errs <- fmt.Errorf("net.Listen(): %w", err)
-		}
-		defer lis.Close()
-		if err := httpServer.Serve(lis); err != nil {
+		slog.Info("server started!", "addr", httpServer.Addr)
+		if err := httpServer.ListenAndServe(); err != nil {
 			errs <- fmt.Errorf("Serve(): %w", err)
 		}
 	}()
-	go func() {
-		lis, err := net.Listen("tcp", "localhost:10123")
-		if err != nil {
-			errs <- fmt.Errorf("net.Listen(): %w", err)
-		}
-		defer lis.Close()
-		if err := grpcSrv.Serve(lis); err != nil {
-			errs <- fmt.Errorf("Serve(): %w", err)
-		}
-	}()
+
 	defer func() {
 		httpServer.Shutdown(ctx)
-		grpcSrv.GracefulStop()
 	}()
 
 	stop := make(chan os.Signal, 1)

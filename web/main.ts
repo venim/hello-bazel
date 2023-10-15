@@ -4,7 +4,7 @@ import { HelloService } from '@hello-bazel/proto/hello_connect.js';
 import { HelloRequest } from '@hello-bazel/proto/hello_pb.js';
 
 const transport = createGrpcWebTransport({
-  baseUrl: "http://localhost:8080",
+  baseUrl: window.location.href,
 });
 
 const client = createPromiseClient(HelloService, transport);
